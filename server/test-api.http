@@ -1,0 +1,17 @@
+### Get all posts
+GET http://localhost:5000/posts
+Content-Type: application/json
+
+###
+
+### Create a post
+POST http://localhost:5000/posts
+Content-Type: application/json
+
+{
+  "title": "REST Client Post",
+  "message": "Posted from VS Code!",
+  "creator": "Payal",
+  "tags": ["rest", "vscode"],
+  "selectedFile": ""
+}
