@@ -11,7 +11,13 @@
           "cmd": "npm start"
         }
       },
-      "language": "node"
+      "language": "node",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "$PORT"
+      }
     }
-  }
+  },
+  "name": "mern-memories09",
+  "region": "us-east-1"
 }
