@@ -48,12 +48,24 @@ const PORT = process.env.PORT || 5000;
 const db = mongoose.connection;
 
 // MongoDB connection
+
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds of not being able to connect
-  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  family: 4 // Use IPv4, skip trying IPv6
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  family: 4,
+  retryWrites: true,
+  w: 'majority'
+});
+
+// Connection events
+db.on('error', (error) => {
+  console.error('MongoDB connection error:', error);
+});
+
+db.once('open', () => {
+  console.log('✅ Connected to MongoDB');
 });
 
 // Connection events
