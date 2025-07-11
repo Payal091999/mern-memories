@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const url = process.env.REACT_APP_API_URL || 'https://mern-memories09-production.up.railway.app/posts';
+const url = process.env.REACT_APP_API_URL || 'https://mern-memories09-production.up.railway.app/api/posts';
 
 export const fetchPosts = () => axios.get(url);
 export const createPost = (newPost) => axios.post(url, newPost);
