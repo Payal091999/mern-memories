@@ -1,5 +1,17 @@
 {
   "build": {
-    "root": "server"
+    "root": "server",
+    "builder": "NIXPACKS",
+    "nixpacksConfig": {
+      "phases": {
+        "install": {
+          "cmds": ["npm install"]
+        },
+        "start": {
+          "cmd": "npm start"
+        }
+      },
+      "language": "node"
+    }
   }
 }
