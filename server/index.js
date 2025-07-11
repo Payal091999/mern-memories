@@ -60,6 +60,32 @@ mongoose.connect(process.env.MONGO_URI, {
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => {
   console.log('✅ Connected to MongoDB');
+  
+  // Add root route
+  app.get('/', (req, res) => {
+    res.json({
+      status: 'success',
+      message: 'Server is running',
+      timestamp: new Date().toISOString(),
+      routes: {
+        posts: '/posts',
+        'single post': '/posts/:id',
+        'like post': '/posts/:id/likePost',
+        'update post': '/posts/:id'
+      }
+    });
+  });
+
+  // Add health check endpoint
+  app.get('/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      db: db.readyState === 1 ? 'connected' : 'disconnected'
+    });
+  });
+
   app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 });
 

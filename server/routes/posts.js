@@ -3,14 +3,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { validatePost } from '../middleware/validation.js';
 import { authenticate } from '../middleware/auth.js';
-import {
-  getPosts,
-  getPost,
-  createPost,
-  updatePost,
-  likePost,
-  deletePost,
-} from '../controllers/posts.js';
+import { getPosts, getPost, createPost, updatePost, deletePost, likePost } from '../controllers/posts.js';
 
 const router = express.Router();
 
@@ -25,11 +18,11 @@ router.use(limiter);
 
 // Routes with validation and authentication
 router.get('/', getPosts); // No auth needed for viewing posts
-router.post('/', authenticate, validatePost, createPost);
+router.post('/', createPost);
 router.get('/:id', getPost);
-router.patch('/:id', authenticate, validatePost, updatePost);
-router.delete('/:id', authenticate, deletePost);
-router.patch('/:id/likePost', authenticate, likePost);
+router.patch('/:id', updatePost);
+router.delete('/:id', deletePost);
+router.patch('/:id/likePost', likePost);
 
 // Error handling middleware
 router.use((err, req, res, next) => {

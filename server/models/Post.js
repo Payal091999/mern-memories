@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import sanitize from 'mongo-sanitize';
+const mongoose = require('mongoose');
+const sanitize = require('mongo-sanitize');
 
 const postSchema = new mongoose.Schema({
   title: {
@@ -87,6 +87,6 @@ postSchema.pre('save', function(next) {
   next();
 });
 
-const Post = mongoose.model('Post', postSchema);
+const postMessage = mongoose.model('PostMessage', postSchema);
 
-export default Post;
+module.exports = postMessage;

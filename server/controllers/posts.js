@@ -1,6 +1,6 @@
 // controllers/posts.js
 import mongoose from 'mongoose';
-import Post from '../models/Post.js';
+import PostMessage from '../models/postMessage.js';
 
 export const getPosts = async (req, res) => { 
   try {
@@ -14,8 +14,11 @@ export const getPosts = async (req, res) => {
 export const getPost = async (req, res) => { 
   const { id } = req.params;
   try {
-    const post = await PostMessage.findById(id);
-    res.status(200).json(post);
+    const postMessage = await PostMessage.findById(id);
+    if (!postMessage) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+    res.status(200).json(postMessage);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -23,11 +26,25 @@ export const getPost = async (req, res) => {
 
 export const createPost = async (req, res) => {
   const { title, message, selectedFile, creator, tags } = req.body;
-  const newPostMessage = new PostMessage({ title, message, selectedFile, creator, tags });
+
+  // Validate required fields
+  if (!title || !message || !creator) {
+    return res.status(400).json({ 
+      message: 'Missing required fields',
+      required: ['title', 'message', 'creator']
+    });
+  }
 
   try {
-    await newPostMessage.save();
-    res.status(201).json(newPostMessage);
+    const postMessage = new PostMessage({ 
+      title, 
+      message, 
+      selectedFile, 
+      creator, 
+      tags: tags || []
+    });
+    await postMessage.save();
+    res.status(201).json(postMessage);
   } catch (error) {
     res.status(409).json({ message: error.message });
   }
@@ -37,32 +54,78 @@ export const updatePost = async (req, res) => {
   const { id } = req.params;
   const { title, message, creator, selectedFile, tags } = req.body;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid post ID' });
+  }
 
-  const updatedPost = { creator, title, message, tags, selectedFile, _id: id };
+  try {
+    const postMessage = await PostMessage.findById(id);
+    if (!postMessage) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
 
-  await PostMessage.findByIdAndUpdate(id, updatedPost, { new: true });
+    // Update only the provided fields
+    const updateFields = {};
+    if (title) updateFields.title = title;
+    if (message) updateFields.message = message;
+    if (creator) updateFields.creator = creator;
+    if (selectedFile) updateFields.selectedFile = selectedFile;
+    if (tags) updateFields.tags = tags;
 
-  res.json(updatedPost);
+    const updatedPostMessage = await PostMessage.findByIdAndUpdate(
+      id,
+      updateFields,
+      { new: true, runValidators: true }
+    );
+
+    res.json(updatedPostMessage);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 export const deletePost = async (req, res) => {
   const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid post ID' });
+  }
 
-  await PostMessage.findByIdAndRemove(id);
+  try {
+    const postMessage = await PostMessage.findById(id);
+    if (!postMessage) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
 
-  res.json({ message: "Post deleted successfully." });
+    await postMessage.deleteOne();
+    res.json({ message: 'Post deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const likePost = async (req, res) => {
   const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
-  
-  const post = await PostMessage.findById(id);
-  const updatedPost = await PostMessage.findByIdAndUpdate(id, { likeCount: post.likeCount + 1 }, { new: true });
-  
-  res.json(updatedPost);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid post ID' });
+  }
+
+  try {
+    const postMessage = await PostMessage.findById(id);
+    if (!postMessage) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    // Update like count directly since we removed the method
+    const updatedPostMessage = await PostMessage.findByIdAndUpdate(
+      id,
+      { likeCount: postMessage.likeCount + 1 },
+      { new: true }
+    );
+
+    res.json(updatedPostMessage);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
